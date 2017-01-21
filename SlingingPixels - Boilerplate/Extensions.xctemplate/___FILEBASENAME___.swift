@@ -42,25 +42,51 @@ extension UICollectionView {
 
 extension UIView {
     
-    @IBInspectable var cornerRadius: CGFloat {
+    private var shadow: Bool {
+        get {
+            return layer.shadowOpacity > 0.0
+        }
+        set { }
+    }
+    
+    private var cornerRadius: CGFloat {
         get {
             return layer.cornerRadius
         }
         set {
             layer.cornerRadius = newValue
-            layer.masksToBounds = newValue > 0
+            if shadow == false {
+                layer.masksToBounds = true
+            }
         }
     }
     
-    func drawLineAcrossBottomWithContext(height: CGFloat, color: UIColor) {
-        
-        let context = UIGraphicsGetCurrentContext()!
-        context.setLineWidth(height)
-        context.setStrokeColor(color.cgColor)
-        context.move(to: CGPoint(x: 0, y: bounds.height))
-        context.addLine(to: CGPoint(x: bounds.width, y: bounds.height))
-        context.strokePath()
+    internal func configure(withCornerRadius corner: CGFloat = 0.0,
+                            shadowColor: CGColor? = nil,
+                            shadowOffset: CGSize = CGSize(width: 1.0, height: 2.0),
+                            shadowOpacity: Float = 0.4,
+                            shadowRadius: CGFloat = 3.0) {
+        if shadowColor != nil {
+            shadow = true
+            layer.shadowColor   = shadowColor
+            layer.shadowOffset  = shadowOffset
+            layer.shadowOpacity = shadowOpacity
+            layer.shadowRadius  = shadowRadius
+        } else {
+            shadow = false
+        }
+        cornerRadius        = corner
     }
+    
+    //    func drawLineAcrossBottomWithContext(height: CGFloat, color: UIColor) {
+    //
+    //        let context = UIGraphicsGetCurrentContext()!
+    //        context.setLineWidth(height)
+    //        context.setStrokeColor(color.cgColor)
+    //        context.move(to: CGPoint(x: 0, y: bounds.height))
+    //        context.addLine(to: CGPoint(x: bounds.width, y: bounds.height))
+    //        context.strokePath()
+    //    }
     //
     //    func drawLineAcrossRightSideWithContext(context: CGContext, height: CGFloat, color: UIColor) {
     //        CGContextSetLineWidth(context, height)
@@ -109,7 +135,6 @@ extension UIButton {
                             shadowColor: UIColor? = nil,
                             cornerRadius corner: CGFloat = 0,
                             font: UIFont = UIFont.systemFont(ofSize: 22, weight: UIFontWeightMedium)) {
-        cornerRadius = corner
         titleLabel?.font = font
         
         setTitle(title, for: .normal)
@@ -117,12 +142,13 @@ extension UIButton {
         backgroundColor = bgColor
         
         if shadowColor != nil {
-            layer.masksToBounds = false
-            layer.shadowColor   = shadowColor?.cgColor
-            layer.shadowOpacity = 1
-            layer.shadowOffset  = CGSize(width: 0, height: 1)
-            layer.shadowRadius  = 1
-            //            layer.shadowPath    = UIBezierPath(rect: bounds).cgPath
+            configure(withCornerRadius: corner,
+                      shadowColor: shadowColor!.cgColor,
+                      shadowOffset: CGSize(width: 0, height: 1),
+                      shadowOpacity: 1,
+                      shadowRadius: 1)
+        } else {
+            configure(withCornerRadius: corner)
         }
     }
 }
